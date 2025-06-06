@@ -3,7 +3,7 @@ import requests
 import os
 
 # Carrega a chave da API do arquivo .env
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+api_key = st.secrets["GROQ_API_KEY"]
 
 st.set_page_config(page_title="SantChat", page_icon="🤖", layout="wide")
 st.title("🤖 SantChat — Assistente IA do Banco")

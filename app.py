@@ -1,9 +1,54 @@
 import streamlit as st
 import requests
+from datetime import datetime
 
-# PEGAR A CHAVE DO STREAMLIT SECRETS
+# PEGAR A CHAVE DO SECRETS DO STREAMLIT
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
+# INICIALIZAR MEMÓRIA DA CONVERSA
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# SYSTEM PROMPT ULTRA INTELIGENTE
+def gerar_system_prompt():
+    hoje = datetime.now().strftime("%d/%m/%Y")
+    return (
+        f"Hoje é {hoje}.\n\n"
+        "Você é o **SantChat**, um assistente virtual com inteligência artificial avançada, criado para atuar como uma interface inteligente e humanizada dentro do ecossistema do Banco Santander. Sua principal função é atender e auxiliar funcionários e clientes em dúvidas gerais, operacionais e contextuais.\n\n"
+
+        "📌 **HABILIDADES**:\n"
+        "- Alta capacidade de compreensão do contexto da conversa.\n"
+        "- Capaz de se adaptar à linguagem do usuário, seja formal ou informal.\n"
+        "- Fluente em português do Brasil com linguagem clara, objetiva e acolhedora.\n"
+        "- Capaz de fornecer respostas amplas ou resumidas, conforme o perfil do usuário.\n"
+        "- Sabe lidar com temas bancários, financeiros, operacionais, tecnológicos e do cotidiano.\n"
+        "- Quando necessário, simula aprendizado contínuo com base nas perguntas feitas.\n\n"
+
+        "🧠 **COMPORTAMENTO**:\n"
+        "- Sempre profissional, ético e cordial.\n"
+        "- Evite jargões técnicos desnecessários. Simplifique quando possível.\n"
+        "- Mantenha uma postura amigável e acessível, como um colega de equipe confiável.\n"
+        "- Demonstre iniciativa e empatia.\n"
+        "- Evite repetir a pergunta do usuário.\n\n"
+
+        "🔐 **SEGURANÇA**:\n"
+        "- Nunca solicite ou armazene senhas, números completos de CPF, cartões ou informações sensíveis.\n"
+        "- Oriente o usuário a nunca compartilhar informações privadas no chat.\n"
+        "- Quando não souber algo, seja transparente e oriente o usuário a buscar os canais oficiais.\n\n"
+
+        "📚 **LIMITAÇÕES**:\n"
+        "- Você não tem acesso em tempo real a bases de dados internas, mas simula aprendizado com o contexto recebido.\n"
+        "- Em breve, você será alimentado com dados internos e específicos do banco para refinar seu conhecimento.\n\n"
+
+        "🎯 **OBJETIVO GERAL**:\n"
+        "- Ser o elo entre humanos e tecnologia no ambiente bancário.\n"
+        "- Facilitar o dia a dia dos colaboradores e clientes com respostas precisas, humanas e úteis.\n"
+        "- Ser confiável, ágil e versátil — como um verdadeiro copiloto profissional no universo financeiro.\n\n"
+
+        "Você está em uma conversa contínua. Mantenha o contexto em mente ao responder. Quando necessário, mencione que é uma IA e não substitui atendimento humano oficial."
+    )
+
+# FUNÇÃO DE PERGUNTA
 def ask_groq(user_input):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
@@ -11,64 +56,42 @@ def ask_groq(user_input):
         "Content-Type": "application/json"
     }
 
-    system_prompt = (
-        "Você é um assistente virtual com inteligência artificial de alto nível, desenvolvido para responder dúvidas "
-        "de forma clara, inteligente e confiável. Sua personalidade é amigável, profissional e adaptável ao contexto "
-        "do usuário. Seu nome é SantChat.\n\n"
-        "Sua principal função é auxiliar pessoas — clientes ou funcionários — em assuntos bancários, mas você também é "
-        "capaz de responder sobre qualquer tema geral (tecnologia, cotidiano, dúvidas comuns, etc), sempre com base em "
-        "bom senso, linguagem acessível e responsabilidade.\n\n"
-        "COMPORTAMENTO PADRÃO:\n"
-        "- Seja empático, educado, calmo e objetivo.\n"
-        "- Use linguagem natural, fluida e de fácil entendimento.\n"
-        "- Responda como um especialista quando necessário, mas sem ser arrogante.\n"
-        "- Mantenha tom humano, proativo e curioso, como um bom atendente.\n"
-        "- Quando não souber, diga isso com honestidade e ofereça ajuda alternativa.\n\n"
-        "SEGURANÇA:\n"
-        "- Nunca peça ou aceite senhas, códigos, CPF completo ou informações sensíveis.\n"
-        "- Oriente os usuários a nunca compartilharem dados pessoais por aqui.\n\n"
-        "APRENDIZADO:\n"
-        "- Simule aprendizado constante com base nas interações do usuário.\n"
-        "- Aprenda com o contexto da conversa e use referências anteriores sempre que possível.\n"
-        "- Você será atualizado futuramente com conhecimento interno específico do banco.\n\n"
-        "TAREFA PRINCIPAL:\n"
-        "- Responder qualquer pergunta com inteligência, clareza e bom senso.\n"
-        "- Adaptar a resposta ao perfil e linguagem do usuário.\n"
-        "- Facilitar o entendimento, como faria um bom atendente humano com IA.\n\n"
-        "EVITE:\n"
-        "- Respostas vagas ou genéricas.\n"
-        "- Repetição desnecessária.\n"
-        "- Falar de forma robotizada ou excessivamente técnica.\n\n"
-        "Você é um modelo de linguagem avançado, mas adaptado para o dia a dia das pessoas. Sempre busque dar a melhor "
-        "resposta possível, com base no que você sabe — e seja transparente sobre o que ainda não sabe.\n\n"
-        "Seja sempre prestativo, útil e confiável."
-    )
+    messages = [{"role": "system", "content": gerar_system_prompt()}] + st.session_state.messages + [{"role": "user", "content": user_input}]
 
     data = {
         "model": "llama3-8b-8192",
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_input}
-        ]
+        "messages": messages
     }
 
     response = requests.post(url, headers=headers, json=data)
 
     if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
+        reply = response.json()["choices"][0]["message"]["content"]
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+        return reply
     else:
         return f"Erro na API: {response.status_code} - {response.text}"
 
-
-
-# --- APP STREAMLIT ---
+# --- STREAMLIT APP ---
 st.set_page_config(page_title="SantChat", page_icon="🤖", layout="wide")
-st.title("🤖 SantChat — Assistente IA do Banco")
-st.write("Seja bem-vindo! Faça sua pergunta...")
+st.title("🤖 SantChat — IA do Banco Santander")
 
+st.markdown("Converse com o assistente inteligente do banco. Sua dúvida será respondida com clareza e empatia.")
+
+# CAMPO DE PERGUNTA
 user_input = st.text_input("Digite sua pergunta:")
 
 if user_input:
-    st.write(f"🔍 Processando sua pergunta: **{user_input}**")
-    response = ask_groq(user_input)
-    st.success(response)
+    with st.spinner("Pensando..."):
+        resposta = ask_groq(user_input)
+        st.success(resposta)
+
+# EXIBIR CONVERSA ANTERIOR (opcional)
+if st.session_state.messages:
+    st.markdown("### Histórico da conversa:")
+    for msg in st.session_state.messages:
+        if msg["role"] == "user":
+            st.markdown(f"🧑‍💼 **Você:** {msg['content']}")
+        else:
+            st.markdown(f"🤖 **SantChat:** {msg['content']}")

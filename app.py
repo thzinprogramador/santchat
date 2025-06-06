@@ -14,7 +14,12 @@ def ask_groq(user_input):
     data = {
         "model": "llama3-8b-8192",  # modelo válido
         "messages": [
-            {"role": "system", "content": "Você é um assistente bancário. Responda com precisão e profissionalismo."},
+            {"role": "system", "content": "Você é o SantChat, um assistente virtual inteligente de um banco brasileiro. 
+Sua função é responder perguntas sobre processos internos, compliance, atendimento, 
+fluxos operacionais e dúvidas recorrentes dos funcionários.
+
+Sempre responda de forma clara, profissional e empática.
+Evite repetir a pergunta e não invente informações. Seja preciso."},
             {"role": "user", "content": user_input}
         ]
     }

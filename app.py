@@ -12,7 +12,7 @@ def ask_groq(user_input):
     }
 
     data = {
-        "model": "mixtral-8x7b-32768",
+        "model": "llama3-8b-8192",  # modelo válido
         "messages": [
             {"role": "system", "content": "Você é um assistente bancário. Responda com precisão e profissionalismo."},
             {"role": "user", "content": user_input}
@@ -25,6 +25,7 @@ def ask_groq(user_input):
         return response.json()["choices"][0]["message"]["content"]
     else:
         return f"Erro na API: {response.status_code} - {response.text}"
+
 
 # --- APP STREAMLIT ---
 st.set_page_config(page_title="SantChat", page_icon="🤖", layout="wide")

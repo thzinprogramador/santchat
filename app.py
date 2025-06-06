@@ -30,7 +30,7 @@ def ask_groq(user_input):
 # --- APP STREAMLIT ---
 st.set_page_config(page_title="SantChat", page_icon="🤖", layout="wide")
 st.title("🤖 SantChat — Assistente IA do Banco")
-st.write("Seja bem-vindo! Faça sua pergunta sobre processos internos, compliance, fluxos operacionais...")
+st.write("Seja bem-vindo! Faça sua pergunta...")
 
 user_input = st.text_input("Digite sua pergunta:")
 

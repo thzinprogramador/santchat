@@ -1,11 +1,9 @@
 import streamlit as st
 import requests
 import os
-from dotenv import load_dotenv
 
 # Carrega a chave da API do arquivo .env
-load_dotenv()
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
 st.set_page_config(page_title="SantChat", page_icon="🤖", layout="wide")
 st.title("🤖 SantChat — Assistente IA do Banco")

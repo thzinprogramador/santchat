@@ -2,6 +2,11 @@ import streamlit as st
 import requests
 from datetime import datetime
 
+# CONFIGURAÇÕES INICIAIS
+st.set_page_config(page_title="SantChat", page_icon="🤖", layout="wide")
+st.title("🤖 SantChat — IA do Banco Santander")
+st.markdown("Converse com o assistente inteligente do banco. Sua dúvida será respondida com clareza e empatia.")
+
 # PEGAR A CHAVE DO SECRETS DO STREAMLIT
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
@@ -9,7 +14,7 @@ GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# SYSTEM PROMPT ULTRA INTELIGENTE
+# SYSTEM PROMPT INTELIGENTE
 def gerar_system_prompt():
     hoje = datetime.now().strftime("%d/%m/%Y")
     return (
@@ -32,66 +37,4 @@ def gerar_system_prompt():
         "- Evite repetir a pergunta do usuário.\n\n"
 
         "🔐 **SEGURANÇA**:\n"
-        "- Nunca solicite ou armazene senhas, números completos de CPF, cartões ou informações sensíveis.\n"
-        "- Oriente o usuário a nunca compartilhar informações privadas no chat.\n"
-        "- Quando não souber algo, seja transparente e oriente o usuário a buscar os canais oficiais.\n\n"
-
-        "📚 **LIMITAÇÕES**:\n"
-        "- Você não tem acesso em tempo real a bases de dados internas, mas simula aprendizado com o contexto recebido.\n"
-        "- Em breve, você será alimentado com dados internos e específicos do banco para refinar seu conhecimento.\n\n"
-
-        "🎯 **OBJETIVO GERAL**:\n"
-        "- Ser o elo entre humanos e tecnologia no ambiente bancário.\n"
-        "- Facilitar o dia a dia dos colaboradores e clientes com respostas precisas, humanas e úteis.\n"
-        "- Ser confiável, ágil e versátil — como um verdadeiro copiloto profissional no universo financeiro.\n\n"
-
-        "Você está em uma conversa contínua. Mantenha o contexto em mente ao responder. Quando necessário, mencione que é uma IA e não substitui atendimento humano oficial."
-    )
-
-# FUNÇÃO DE PERGUNTA
-def ask_groq(user_input):
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    messages = [{"role": "system", "content": gerar_system_prompt()}] + st.session_state.messages + [{"role": "user", "content": user_input}]
-
-    data = {
-        "model": "llama3-8b-8192",
-        "messages": messages
-    }
-
-    response = requests.post(url, headers=headers, json=data)
-
-    if response.status_code == 200:
-        reply = response.json()["choices"][0]["message"]["content"]
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        st.session_state.messages.append({"role": "assistant", "content": reply})
-        return reply
-    else:
-        return f"Erro na API: {response.status_code} - {response.text}"
-
-# --- STREAMLIT APP ---
-st.set_page_config(page_title="SantChat", page_icon="🤖", layout="wide")
-st.title("🤖 SantChat — IA do Banco Santander")
-
-st.markdown("Converse com o assistente inteligente do banco. Sua dúvida será respondida com clareza e empatia.")
-
-# CAMPO DE PERGUNTA
-user_input = st.text_input("Digite sua pergunta:")
-
-if user_input:
-    with st.spinner("Pensando..."):
-        resposta = ask_groq(user_input)
-        st.success(resposta)
-
-# EXIBIR CONVERSA ANTERIOR (opcional)
-if st.session_state.messages:
-    st.markdown("### Histórico da conversa:")
-    for msg in st.session_state.messages:
-        if msg["role"] == "user":
-            st.markdown(f"🧑‍💼 **Você:** {msg['content']}")
-        else:
-            st.markdown(f"🤖 **SantChat:** {msg['content']}")
+        "- Nunca solicite ou armazene senha
